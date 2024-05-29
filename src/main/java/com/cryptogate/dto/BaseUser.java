@@ -2,13 +2,12 @@ package com.cryptogate.dto;
 
 import com.cryptogate.enums.Department;
 import com.cryptogate.enums.Role;
-import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 @Data
 @Builder
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 public class BaseUser {
 
     private String userAddress;

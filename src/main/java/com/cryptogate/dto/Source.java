@@ -13,7 +13,7 @@ public class Source {
 
     private String sourceCID;
 
-    private SourceType type;
+    private SourceType sourceType;
 
     private String owner;
 

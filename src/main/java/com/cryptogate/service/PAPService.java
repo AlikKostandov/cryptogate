@@ -1,43 +1,45 @@
 package com.cryptogate.service;
 
-import com.cryptogate.config.EthereumConnector;
 import com.cryptogate.contract.PAP;
 import com.cryptogate.dto.BaseUser;
+import com.cryptogate.enums.Department;
+import com.cryptogate.enums.Role;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.tx.ClientTransactionManager;
-import org.web3j.tx.TransactionManager;
-import org.web3j.tx.gas.ContractGasProvider;
-import org.web3j.tx.gas.DefaultGasProvider;
+import org.web3j.tuples.generated.Tuple3;
 
 import java.math.BigInteger;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PAPService {
 
-    private PAP pap;
+    private final PAP pap;
 
-    public PAPService(String adminAddress, String contractAddress, String rpcEndpoint) {
-        EthereumConnector ethereumConnector = new EthereumConnector();
-        Web3j web3j = ethereumConnector.getWeb3();
-        TransactionManager transactionManager = new ClientTransactionManager(web3j, adminAddress);
-        ContractGasProvider gasProvider = new DefaultGasProvider();
-        this.pap = PAP.load(contractAddress, web3j, transactionManager, gasProvider);
+    public TransactionReceipt registerUser(String userAddress, BaseUser user) throws Exception {
+        log.info("Попытка зарегистрировать пользователя с userAddress = {}", userAddress);
+        return pap.registerUser(
+                userAddress,
+                user.getUsername(),
+                user.getPassword(),
+                BigInteger.valueOf(user.getRole().getId()),
+                BigInteger.valueOf(user.getDepartment().getDepId()))
+                .send();
     }
 
-    public TransactionReceipt registerUser(BaseUser userDto) throws Exception {
-        BigInteger roleValue = BigInteger.valueOf(userDto.getRole().getId());
-        BigInteger departmentValue = BigInteger.valueOf(userDto.getDepartment().getDepId());
-        RemoteCall<TransactionReceipt> remoteCall = pap.registerUser(userDto.getUserAddress(), userDto.getUsername(), roleValue, departmentValue);
-        return remoteCall.send();
+    public BaseUser getUser(String userAddress) throws Exception {
+        Tuple3<String, BigInteger, BigInteger> userData = pap.getUser(userAddress).send();
+        return BaseUser.builder()
+                .username(userData.getValue1())
+                .role(Role.getById((long) userData.getValue2().intValue()))
+                .department(Department.getByDepId((long) userData.getValue3().intValue())).build();
     }
 
-    public PAP.BaseUser getUser(String userAddress) throws Exception {
-        RemoteCall<PAP.BaseUser> remoteCall = pap.getUser(userAddress);
-        return remoteCall.send();
+    public boolean authenticateUser(String userAddress, String password) throws Exception {
+        log.info("Попытка авторизации пользователя с userAddress = {}", userAddress);
+        return pap.authenticateUser(userAddress, password).send();
     }
 }
