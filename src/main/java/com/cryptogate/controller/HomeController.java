@@ -1,20 +1,16 @@
 package com.cryptogate.controller;
 
-import com.cryptogate.service.UserService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-@Slf4j
 @Controller
 @RequiredArgsConstructor
-public class AuthController {
+public class HomeController {
 
-    private final UserService userService;
-
-    @GetMapping("/login")
+    @GetMapping("/home")
     public String showLoginForm() {
-        return "login-page";
+        return "home-page";
     }
+
 }
