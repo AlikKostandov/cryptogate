@@ -4,33 +4,54 @@ pragma solidity ^0.8.0;
 import "./PRP.sol";
 
 contract PAP {
+    PRP public prp;
+    address private owner;
 
-    address public prpContractAddress;
+    event PolicyStored(string policyId, uint sourceType, address createdBy);
+    event PolicyDeleted(string policyId);
 
-    event PolicyCreated(uint id, string name, address createdBy);
-
-    constructor(address _prpContractAddress) {
-        prpContractAddress = _prpContractAddress;
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner can perform this action");
+        _;
     }
 
-    function createPolicy(string memory _name, string memory _description, string memory _rule) public {
-        PRP prpContract = PRP(prpContractAddress);
-        prpContract.storePolicy(_name, _description, _rule, msg.sender);
-        emit PolicyCreated(prpContract.nextPolicyId() - 1, _name, msg.sender);
+    constructor(address _prpAddress) {
+        owner = msg.sender;
+        prp = PRP(_prpAddress);
     }
 
-    function deletePolicy(uint _id) public {
-        PRP prpContract = PRP(prpContractAddress);
-        prpContract.deletePolicy(_id);
+    function createPolicy(
+        string memory _policyId,
+        uint _sourceType,
+        uint _secretLevel,
+        uint[] memory _allowedRoles,
+        uint[] memory _allowedDepartments
+    ) public onlyOwner {
+        prp.storePolicy(
+            _policyId,
+            _sourceType,
+            _secretLevel,
+            _allowedRoles,
+            _allowedDepartments);
+        emit PolicyStored(_policyId, _sourceType, owner);
     }
 
-    function getPolicy(uint _id) public view returns (PRP.Policy memory) {
-        PRP prpContract = PRP(prpContractAddress);
-        return prpContract.getPolicy(_id);
+
+    function removePolicy(string memory _policyId) public onlyOwner {
+        prp.removePolicy(_policyId);
+        emit PolicyDeleted(_policyId);
     }
 
     function getAllPolicies() public view returns (PRP.Policy[] memory) {
-        PRP prpContract = PRP(prpContractAddress);
-        return prpContract.getAllPolicies();
+        return prp.getAllPolicies();
     }
+
+    function getPolicy(string memory _policyId)
+    public
+    view
+    returns (PRP.Policy memory)
+    {
+        return prp.getPolicy(_policyId);
+    }
+
 }

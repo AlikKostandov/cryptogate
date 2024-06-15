@@ -4,54 +4,96 @@ pragma solidity ^0.8.0;
 contract PIP {
 
     struct BaseUser {
-        string userAddress;
+        address userAddress;
         string username;
-        bytes32 passwordHash;
-        uint role; // 0: ADMIN, 1: MANAGER, 2: EMPLOYEE, 3: GUEST
-        uint department; // 0: IT, 1: HR, 2: FINANCE, 3: SALES, 4: MARKETING, 5: OPERATIONS, 6: CUSTOMER_SERVICE
+        uint role;
+        uint department;
     }
 
     struct Source {
-        string sourceCID;
-        string owner;
+        string sourceId;
+        address owner;
         uint sourceType;
-        uint secretLevel; // 0: PUBLIC, 1: INTERNAL, 2: CONFIDENTIAL, 3: SECRET
+        uint secretLevel;
         string[] sourceTags;
     }
 
-    mapping(string => BaseUser) public users;
-    mapping(string => Source) public sources;
+    mapping(address => BaseUser) private users;
+    mapping(string => Source) private sources;
 
-    event UserRegistered(string userAddress);
-    event SourceRegistered(string sourceCID);
+    address private owner;
 
-    function registerUser(
-        string memory _userAddress,
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner can perform this action");
+        _;
+    }
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    function addUser(
+        address _userAddress,
         string memory _username,
-        bytes32 _passwordHash,
         uint _role,
         uint _department
-    ) public {
-        users[_userAddress] = BaseUser(_userAddress, _username, _passwordHash, _role, _department);
-        emit UserRegistered(_userAddress);
+    ) public onlyOwner {
+        require(_role <= 3, "Invalid role");
+        require(_department <= 6, "Invalid department");
+
+        users[_userAddress] = BaseUser({
+            userAddress: _userAddress,
+            username: _username,
+            role: _role,
+            department: _department
+        });
     }
 
-    function registerSource(
-        string memory _sourceCID,
-        string memory _owner,
-        uint _sourceType,
-        uint _secretLevel,
-        string[] memory _sourceTags
-    ) public {
-        sources[_sourceCID] = Source(_sourceCID, _owner, _sourceType, _secretLevel, _sourceTags);
-        emit SourceRegistered(_sourceCID);
-    }
-
-    function getUser(string memory _userAddress) public view returns (BaseUser memory) {
+    function getUser(address _userAddress)
+    public
+    view
+    returns (BaseUser memory)
+    {
+        require(users[_userAddress].userAddress != address(0), "User does not exist");
         return users[_userAddress];
     }
 
-    function getSource(string memory _sourceCID) public view returns (Source memory) {
-        return sources[_sourceCID];
+    function removeUser(address _userAddress) public onlyOwner {
+        require(users[_userAddress].userAddress != address(0), "User does not exist");
+        delete users[_userAddress];
+    }
+
+    function addSource(
+        string memory _sourceId,
+        address _owner,
+        uint _sourceType,
+        uint _secretLevel,
+        string[] memory _sourceTags
+    ) public onlyOwner {
+        require(_sourceType <= 7, "Invalid source type");
+        require(_secretLevel <= 3, "Invalid secret level");
+        require(users[_owner].userAddress != address(0), "Owner does not exist");
+
+        sources[_sourceId] = Source({
+            sourceId: _sourceId,
+            owner: _owner,
+            sourceType: _sourceType,
+            secretLevel: _secretLevel,
+            sourceTags: _sourceTags
+        });
+    }
+
+    function getSource(string memory _sourceId)
+    public
+    view
+    returns (Source memory)
+    {
+        require(bytes(sources[_sourceId].sourceId).length != 0, "Source does not exist");
+        return sources[_sourceId];
+    }
+
+    function removeSource(string memory _sourceId) public onlyOwner {
+        require(bytes(sources[_sourceId].sourceId).length != 0, "Source does not exist");
+        delete sources[_sourceId];
     }
 }
