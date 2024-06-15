@@ -5,38 +5,58 @@ import "./PIP.sol";
 import "./PRP.sol";
 
 contract PDP {
+    PIP public pip;
+    PRP public prp;
 
-    address public pipContractAddress;
-    address public prpContractAddress;
+    address private owner;
+    address private pepAddress;
 
-    event AccessDecision(address indexed userAddress, string sourceCID, bool accessGranted);
-
-    constructor(address _pipContractAddress, address _prpContractAddress) {
-        pipContractAddress = _pipContractAddress;
-        prpContractAddress = _prpContractAddress;
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner can perform this action");
+        _;
     }
 
-    function evaluateAccess(string memory _userAddress, string memory _sourceCID) public {
-        PIP pipContract = PIP(pipContractAddress);
-        PRP prpContract = PRP(prpContractAddress);
-
-        PIP.BaseUser memory user = pipContract.getUser(_userAddress);
-        PIP.Source memory source = pipContract.getSource(_sourceCID);
-
-        PRP.Policy memory policy = prpContract.getPolicy(0);
-
-        bool accessGranted = evaluatePolicy(policy, user, source);
-
-        emit AccessDecision(msg.sender, _sourceCID, accessGranted);
+    function setPEPAddress(address _pepAddress) public onlyOwner {
+        pepAddress = _pepAddress;
     }
 
-    function evaluatePolicy(
-        PRP.Policy memory _policy,
-        PIP.BaseUser memory _user,
-        PIP.Source memory _source
-    ) private pure returns (bool) {
+    modifier onlyPEP() {
+        require(msg.sender == pepAddress, "The method can only be accessed via PEP");
+        _;
+    }
 
-        bool accessGranted = (block.timestamp % 2 == 0);
-        return accessGranted;
+    constructor(address _pipAddress, address _prpAddress) {
+        owner = msg.sender;
+        pip = PIP(_pipAddress);
+        prp = PRP(_prpAddress);
+    }
+
+    function checkAccess(address _userAddress, string memory _resourceId) public onlyPEP view returns (bool) {
+        PIP.BaseUser memory user = pip.getUser(_userAddress);
+        PIP.Source memory resource = pip.getSource(_resourceId);
+        if (keccak256(abi.encodePacked(_userAddress)) == keccak256(abi.encodePacked(resource.owner))) {
+            return true;
+        }
+
+        PRP.Policy[] memory policies = prp.getAllPolicies();
+
+        for (uint i = 0; i < policies.length; i++) {
+            PRP.Policy memory policy = policies[i];
+            if (policy.sourceType == resource.sourceType && policy.secretLevel == resource.secretLevel) {
+                for (uint j = 0; j < policy.allowedRoles.length; j++) {
+                    if (user.role == policy.allowedRoles[j]) {
+                        return true;
+                    }
+                }
+
+                for (uint j = 0; j < policy.allowedDepartments.length; j++) {
+                    if (user.department == policy.allowedDepartments[j]) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 }
