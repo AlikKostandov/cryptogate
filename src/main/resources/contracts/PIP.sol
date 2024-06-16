@@ -20,6 +20,7 @@ contract PIP {
 
     mapping(address => BaseUser) private users;
     mapping(string => Source) private sources;
+    address[] private userAddresses;
 
     address private owner;
 
@@ -40,6 +41,7 @@ contract PIP {
     ) public onlyOwner {
         require(_role <= 3, "Invalid role");
         require(_department <= 6, "Invalid department");
+        require(users[_userAddress].userAddress == address(0), "User already exists");
 
         users[_userAddress] = BaseUser({
             userAddress: _userAddress,
@@ -47,6 +49,7 @@ contract PIP {
             role: _role,
             department: _department
         });
+        userAddresses.push(_userAddress);
     }
 
     function getUser(address _userAddress)
@@ -61,6 +64,22 @@ contract PIP {
     function removeUser(address _userAddress) public onlyOwner {
         require(users[_userAddress].userAddress != address(0), "User does not exist");
         delete users[_userAddress];
+
+        for (uint i = 0; i < userAddresses.length; i++) {
+            if (userAddresses[i] == _userAddress) {
+                userAddresses[i] = userAddresses[userAddresses.length - 1];
+                userAddresses.pop();
+                break;
+            }
+        }
+    }
+
+    function getAllUsers() public view returns (BaseUser[] memory) {
+        BaseUser[] memory allUsers = new BaseUser[](userAddresses.length);
+        for (uint i = 0; i < userAddresses.length; i++) {
+            allUsers[i] = users[userAddresses[i]];
+        }
+        return allUsers;
     }
 
     function addSource(
@@ -73,6 +92,7 @@ contract PIP {
         require(_sourceType <= 7, "Invalid source type");
         require(_secretLevel <= 3, "Invalid secret level");
         require(users[_owner].userAddress != address(0), "Owner does not exist");
+        require(bytes(sources[_sourceId].sourceId).length == 0, "Source already exists");
 
         sources[_sourceId] = Source({
             sourceId: _sourceId,

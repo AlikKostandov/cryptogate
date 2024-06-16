@@ -8,16 +8,13 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class BaseUser {
+public class BaseUserEntity {
 
     private String userAddress;
 
     private String username;
 
-    private String password;
-
     private Role role;
 
     private Department department;
-
 }

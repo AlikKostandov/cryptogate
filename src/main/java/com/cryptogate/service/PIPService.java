@@ -1,47 +1,63 @@
 package com.cryptogate.service;
 
 import com.cryptogate.contract.PIP;
-import com.cryptogate.dto.BaseUser;
-import com.cryptogate.enums.Department;
-import com.cryptogate.enums.Role;
+import com.cryptogate.converters.BaseUserConverter;
+import com.cryptogate.dto.BaseUserEntity;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.tx.ClientTransactionManager;
-import org.web3j.tx.TransactionManager;
-import org.web3j.tx.gas.ContractGasProvider;
-import org.web3j.tx.gas.DefaultGasProvider;
-import org.web3j.tuples.generated.Tuple2;
+import org.springframework.util.CollectionUtils;
+import org.web3j.protocol.exceptions.TransactionException;
 
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PIPService {
 
     private final PIP pip;
 
-    public TransactionReceipt setUserAttributes(String userAddress, BigInteger role, BigInteger department) throws Exception {
-        return pip.setUserAttributes(userAddress, role, department).send();
+    private final BaseUserConverter baseUserConverter;
+
+    public void addUser(String userAddress, String username, Long role, Long department) throws Exception {
+        try {
+            pip.addUser(userAddress, username, BigInteger.valueOf(role), BigInteger.valueOf(department)).send();
+        } catch (TransactionException e) {
+            log.info("Exception reason: " + e.getMessage());
+        }
     }
 
-    public BaseUser getUserAttributes(String userAddress) throws Exception {
-        Tuple2<BigInteger, BigInteger> userAttributes = pip.getUserAttributes(userAddress).send();
-        return BaseUser.builder()
-                .role(Role.getById((long) userAttributes.getValue1().intValue()))
-                .department(Department.getByDepId((long) userAttributes.getValue2().intValue()))
-                .build();
+
+    //
+//    public PIP.BaseUser getUser(String userAddress) throws Exception {
+//        return pip.getUser(userAddress).send();
+//    }
+//
+    public void removeUser(String userAddress) {
+        try {
+            pip.removeUser(userAddress).send();
+        } catch (Exception e) {
+            log.info("Exception reason: " + e.getMessage());
+        }
     }
 
-    public void setObjectAttributes(String objectCID, BigInteger type, BigInteger secretLevel) throws Exception {
-        pip.setObjectAttributes(objectCID.getBytes(StandardCharsets.UTF_8), type, secretLevel).send();
-    }
-
-    public Tuple2<BigInteger, BigInteger> getObjectAttributes(String objectCID) throws Exception {
-        return pip.getObjectAttributes(objectCID.getBytes(StandardCharsets.UTF_8)).send();
+    public List<BaseUserEntity> getAllUsers() {
+        List<PIP.BaseUser> usersFromBC = null;
+        try {
+            usersFromBC = pip.getAllUsers().send();
+            if (Boolean.FALSE.equals(CollectionUtils.isEmpty(usersFromBC))) {
+                return usersFromBC.stream()
+                        .map(baseUserConverter::convert).collect(Collectors.toList());
+            }
+        } catch (Exception e) {
+            log.info("Exception reason: " + e.getMessage());
+            return new ArrayList<>();
+        }
+        return new ArrayList<>();
     }
 
 }
