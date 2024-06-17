@@ -12,15 +12,16 @@ contract PIP {
 
     struct Source {
         string sourceId;
+        string title;
         address owner;
         uint sourceType;
         uint secretLevel;
-        string[] sourceTags;
     }
 
     mapping(address => BaseUser) private users;
     mapping(string => Source) private sources;
     address[] private userAddresses;
+    string[] private sourceIds;
 
     address private owner;
 
@@ -84,10 +85,10 @@ contract PIP {
 
     function addSource(
         string memory _sourceId,
+        string memory _title,
         address _owner,
         uint _sourceType,
-        uint _secretLevel,
-        string[] memory _sourceTags
+        uint _secretLevel
     ) public onlyOwner {
         require(_sourceType <= 7, "Invalid source type");
         require(_secretLevel <= 3, "Invalid secret level");
@@ -96,11 +97,12 @@ contract PIP {
 
         sources[_sourceId] = Source({
             sourceId: _sourceId,
+            title: _title,
             owner: _owner,
             sourceType: _sourceType,
-            secretLevel: _secretLevel,
-            sourceTags: _sourceTags
+            secretLevel: _secretLevel
         });
+        sourceIds.push(_sourceId); // Сохраняем идентификатор источника
     }
 
     function getSource(string memory _sourceId)
@@ -115,5 +117,21 @@ contract PIP {
     function removeSource(string memory _sourceId) public onlyOwner {
         require(bytes(sources[_sourceId].sourceId).length != 0, "Source does not exist");
         delete sources[_sourceId];
+
+        for (uint i = 0; i < sourceIds.length; i++) {
+            if (keccak256(abi.encodePacked(sourceIds[i])) == keccak256(abi.encodePacked(_sourceId))) {
+                sourceIds[i] = sourceIds[sourceIds.length - 1];
+                sourceIds.pop();
+                break;
+            }
+        }
+    }
+
+    function getAllSources() public view returns (Source[] memory) {
+        Source[] memory allSources = new Source[](sourceIds.length);
+        for (uint i = 0; i < sourceIds.length; i++) {
+            allSources[i] = sources[sourceIds[i]];
+        }
+        return allSources;
     }
 }
