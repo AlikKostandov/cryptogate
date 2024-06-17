@@ -9,15 +9,15 @@ import java.util.List;
 
 @Data
 @Builder
-public class Source {
+public class Source implements Convertable{
 
-    private String sourceCID;
+    private String sourceId;
 
-    private SourceType sourceType;
+    private String title;
 
     private String owner;
 
-    private SecretLevel secretLevel;
+    private SourceType sourceType;
 
-    private List<String> sourceTags;
+    private SecretLevel secretLevel;
 }

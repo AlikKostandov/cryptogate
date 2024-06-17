@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Cryptogate</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+<div class="container">
+    <div th:replace="~{navigation :: navigation(Source)}"/>
+    <h1>Ресурсы системы:</h1>
+    <br/>
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <td><b>Владелец</b></td>
+            <td><b>Название</b></td>
+            <td><b>Тип ресурса</b></td>
+            <td><b>Уровень секретности</b></td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="s : ${sources}">
+            <td th:text="${s.owner}"></td>
+            <td th:text="${s.title}"></td>
+            <td th:text="${s.sourceType.extension}"></td>
+            <td th:text="${s.secretLevel.name()}"></td>
+            <td>
+                <!--                <a class="btn btn-secondary" th:href="@{'admin/edit/' + ${u.passNumber}}">Изменить уровень доступа</a>-->
+                <a class="btn btn-danger" th:href="@{'sources/remove/' + ${s.sourceId}}">Удалить</a>
+            </td>
+        </tr>
+        <tr>
+            <form th:action="@{'sources/source/add'}" method="post">
+                <td>
+                    <select name="owner" id="owner" class="form-control" required
+                            aria-label=".form-select-sm example">
+                        <option selected disabled value=" ">Choose</option>
+                        <option th:each="u : ${users}"
+                                th:value="${u}"
+                                th:text="${u}"></option>
+                    </select>
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="title" placeholder="Title">
+                </td>
+                <td>
+                    <select name="sourceType" id="department" class="form-control" required
+                            aria-label=".form-select-sm example">
+                        <option selected disabled value=" ">Choose</option>
+                        <option value="0">HTML</option>
+                        <option value="1">TXT</option>
+                        <option value="2">PDF</option>
+                        <option value="3">XLSX</option>
+                        <option value="4">DOCX</option>
+                        <option value="5">ZIP</option>
+                        <option value="6">PNG</option>
+                        <option value="7">JPEG</option>
+                    </select>
+                </td>
+                <td>
+                    <select name="secretLevel" id="role" required class="form-control" aria-label=".form-select-sm example">
+                        <option selected disabled value=" ">Choose</option>
+                        <option value="0">PUBLIC</option>
+                        <option value="1">INTERNAL</option>
+                        <option value="2">CONFIDENTIAL</option>
+                        <option value="3">SECRET</option>
+                    </select>
+                </td>
+                <td>
+                    <input type="submit" class="btn btn-primary" value="Добавить">
+                </td>
+            </form>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
