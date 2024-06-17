@@ -11,10 +11,11 @@
 </head>
 
 <body>
-<td class="container">
+<div class="container">
+    <div th:replace="~{navigation :: navigation(Admin)}"/>
     <h1>Администрационная панель</h1>
     <br/>
-    <h4>Зарегистрировать сотрудника:</h4>
+    <h4>Сотрудники:</h4>
     <table class="table table-hover">
         <thead>
         <tr>
@@ -44,7 +45,8 @@
                     <input type="text" class="form-control" name="username" placeholder="Username">
                 </td>
                 <td>
-                    <select name="department" id="dep" class="form-control" required aria-label=".form-select-sm example">
+                    <select name="department" id="dep" class="form-control" required
+                            aria-label=".form-select-sm example">
                         <option selected disabled value=" ">Choose</option>
                         <option value="0">Информационные технологии</option>
                         <option value="1">Отдел кадров</option>
@@ -70,5 +72,6 @@
         </tr>
         </tbody>
     </table>
+</div>
 </body>
 </html>
