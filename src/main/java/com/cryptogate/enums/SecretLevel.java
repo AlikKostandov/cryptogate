@@ -8,9 +8,9 @@ import java.util.Arrays;
 public enum SecretLevel {
 
     PUBLIC(0L),
-    INTERNAL(1L),
+    ARBITRARY(1L),
     CONFIDENTIAL(2L),
-    SECRET(3L);
+    PRIVATE(3L);
 
     private final Long level;
 

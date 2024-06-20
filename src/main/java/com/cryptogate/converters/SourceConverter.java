@@ -17,6 +17,7 @@ public class SourceConverter implements BaseConverter<PIP.Source> {
                 .title(entity.title)
                 .sourceType(SourceType.getById(entity.sourceType.longValue()))
                 .secretLevel(SecretLevel.getByLevel(entity.secretLevel.longValue()))
+                .allowedUser(entity.allowedUser)
                 .build();
     }
 }
