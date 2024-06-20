@@ -74,31 +74,31 @@ public class EthereumConfig {
         return pip;
     }
 
-    @Bean
-    public PDP pdp(Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider, PIP pip, PRP prp) {
-        PDP pdp;
-        try {
-            pdp = PDP.deploy(web3j, transactionManager, contractGasProvider, pip.getContractAddress(), prp.getContractAddress()).send();
-        } catch (Exception e) {
-            log.error("Error while deploying a contract", e);
-            throw new RuntimeException(e);
-        }
-        log.info("PDP contract has been deployed: {}", prp.getContractAddress());
-        return pdp;
-    }
-
-    @Bean
-    public PEP pep(Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider, PDP pdp) {
-        PEP pep;
-        try {
-            pep = PEP.deploy(web3j, transactionManager, contractGasProvider, pdp.getContractAddress()).send();
-            pdp.setPEPAddress(pep.getContractAddress());
-        } catch (Exception e) {
-            log.error("Error while deploying a contract", e);
-            throw new RuntimeException(e);
-        }
-        log.info("PEP contract has been deployed: {}", pep.getContractAddress());
-        return pep;
-    }
+//    @Bean
+//    public PDP pdp(Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider, PIP pip, PRP prp) {
+//        PDP pdp;
+//        try {
+//            pdp = PDP.deploy(web3j, transactionManager, contractGasProvider, pip.getContractAddress(), prp.getContractAddress()).send();
+//        } catch (Exception e) {
+//            log.error("Error while deploying a contract", e);
+//            throw new RuntimeException(e);
+//        }
+//        log.info("PDP contract has been deployed: {}", prp.getContractAddress());
+//        return pdp;
+//    }
+//
+//    @Bean
+//    public PEP pep(Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider, PDP pdp) {
+//        PEP pep;
+//        try {
+//            pep = PEP.deploy(web3j, transactionManager, contractGasProvider, pdp.getContractAddress()).send();
+//            pdp.setPEPAddress(pep.getContractAddress());
+//        } catch (Exception e) {
+//            log.error("Error while deploying a contract", e);
+//            throw new RuntimeException(e);
+//        }
+//        log.info("PEP contract has been deployed: {}", pep.getContractAddress());
+//        return pep;
+//    }
 
 }

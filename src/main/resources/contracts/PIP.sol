@@ -16,6 +16,7 @@ contract PIP {
         address owner;
         uint sourceType;
         uint secretLevel;
+        address allowedUser;
     }
 
     mapping(address => BaseUser) private users;
@@ -88,7 +89,8 @@ contract PIP {
         string memory _title,
         address _owner,
         uint _sourceType,
-        uint _secretLevel
+        uint _secretLevel,
+        address _allowedUser
     ) public onlyOwner {
         require(_sourceType <= 7, "Invalid source type");
         require(_secretLevel <= 3, "Invalid secret level");
@@ -100,7 +102,8 @@ contract PIP {
             title: _title,
             owner: _owner,
             sourceType: _sourceType,
-            secretLevel: _secretLevel
+            secretLevel: _secretLevel,
+            allowedUser: _allowedUser
         });
         sourceIds.push(_sourceId); // Сохраняем идентификатор источника
     }

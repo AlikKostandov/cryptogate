@@ -64,13 +64,17 @@
                     </select>
                 </td>
                 <td>
-                    <select name="secretLevel" id="role" required class="form-control" aria-label=".form-select-sm example">
+                    <select name="secretLevel" id="secretLevel" required class="form-control" aria-label=".form-select-sm example">
                         <option selected disabled value=" ">Choose</option>
                         <option value="0">PUBLIC</option>
-                        <option value="1">INTERNAL</option>
+                        <option value="1">ARBITRARY</option>
                         <option value="2">CONFIDENTIAL</option>
-                        <option value="3">SECRET</option>
+                        <option value="3">PRIVATE</option>
                     </select>
+                    <div class="form-group">
+                        <label for="allowedUser">Allowed Users:</label>
+                        <input type="text" id="allowedUser" name="allowedUser" class="form-control" readonly>
+                    </div>
                 </td>
                 <td>
                     <input type="submit" class="btn btn-primary" value="Добавить">
@@ -80,5 +84,52 @@
         </tbody>
     </table>
 </div>
+<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="userModalLabel">Select User</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="userSelectionForm">
+                    <div class="form-group" th:each="user : ${users}">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="user" th:id="${user}" th:value="${user}">
+                            <label class="form-check-label" th:for="${user}" th:text="${user}"></label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveUser">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    document.getElementById('secretLevel').addEventListener('change', function() {
+        if (this.value === '2') {
+            $('#userModal').modal('show');
+        } else {
+            $('#allowedUser').val('');
+            $('#userSelectionForm input:checked').prop('checked', false);
+        }
+    });
+
+    document.getElementById('saveUser').addEventListener('click', function() {
+        let allowedUser = $('#userSelectionForm input:checked').val();
+        $('#allowedUser').val(allowedUser);
+        $('#userModal').modal('hide');
+    });
+</script>
 </body>
 </html>

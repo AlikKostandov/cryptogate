@@ -20,4 +20,6 @@ public class Source implements Convertable{
     private SourceType sourceType;
 
     private SecretLevel secretLevel;
+
+    private String allowedUser;
 }

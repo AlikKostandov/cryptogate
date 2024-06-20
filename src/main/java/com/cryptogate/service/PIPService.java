@@ -5,10 +5,12 @@ import com.cryptogate.converters.BaseUserConverter;
 import com.cryptogate.converters.SourceConverter;
 import com.cryptogate.dto.BaseUserEntity;
 import com.cryptogate.dto.Source;
+import com.cryptogate.util.CommonConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.thymeleaf.util.StringUtils;
 import org.web3j.protocol.exceptions.TransactionException;
 
 import java.math.BigInteger;
@@ -67,12 +69,14 @@ public class PIPService {
     }
 
     public void addSource(String owner, String title,
-                          Long sourceType, Long secretLevel) {
+                          Long sourceType, Long secretLevel,
+                          String allowedUsers) {
         try {
             String sourceId = UUID.randomUUID().toString();
             pip.addSource(sourceId, title, owner,
                     BigInteger.valueOf(sourceType),
-                    BigInteger.valueOf(secretLevel)).send();
+                    BigInteger.valueOf(secretLevel),
+                    StringUtils.isEmpty(allowedUsers) ? CommonConstants.NULL_USER : allowedUsers).send();
         } catch (Exception e) {
             log.info("Exception reason: " + e.getMessage());
         }

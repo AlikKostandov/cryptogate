@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./PDP.sol";
+import "../cached/PDP.sol";
 
 contract PEP {
     PDP public pdp;

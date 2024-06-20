@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -34,8 +33,9 @@ public class SourceController {
     public String addNewSource(@RequestParam String owner,
                                @RequestParam String title,
                                @RequestParam Long sourceType,
-                               @RequestParam Long secretLevel) throws Exception {
-        pipService.addSource(owner, title, sourceType, secretLevel);
+                               @RequestParam Long secretLevel,
+                               @RequestParam String allowedUser) throws Exception {
+        pipService.addSource(owner, title, sourceType, secretLevel, allowedUser);
         return "redirect:/sources";
     }
 
