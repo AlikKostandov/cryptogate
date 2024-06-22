@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Access Policies</title>
+    <!-- Подключение Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <style>
+        .card-custom {
+            transition: transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .card-custom:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+        .card-custom .card-title {
+            font-weight: bold;
+        }
+        .card-custom .btn {
+            margin-right: 5px;
+        }
+        .add-policy-card {
+            border: 2px dashed #28a745;
+            background: #f8f9fa;
+        }
+        .add-policy-card:hover {
+            background: #e9ecef;
+        }
+        .add-policy-card .card-body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+        .add-policy-card .btn {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div th:replace="~{navigation :: navigation(Policies)}"/>
+    <h1>Политики доступа:</h1>
+    <br/>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-4 mb-4" th:each="p: ${policies}">
+                <div class="card card-custom">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <span th:text="${policies.indexOf(p) + 1 + '.'}"></span>
+                            <span th:if="${p.sourceType == null}">На ресурс</span>
+                            <span th:if="${p.sourceType != null}">На категорию ресурсов</span>
+                        </h5>
+                        <p class="card-text" th:if="${p.sourceId.length() > 0}" th:text="${'UUID: ' + p.sourceId}">SourceId</p>
+                        <p class="card-text" th:if="${p.sourceType != null}" th:text="${'Категория: ' + p.sourceType.name()}">Source Type</p>
+                        <p class="card-text" th:if="${p.allowedRole != null}" th:text="${'Уровень допуска: ' + p.allowedRole.getRoleName()}">Role Name</p>
+                        <p class="card-text" th:if="${p.allowedDepartment != null}" th:text="${'Разрешенный департамент: ' + p.allowedDepartment.getDepartmentName()}">Department Name</p>
+                        <a class="btn btn-danger" th:href="@{'policies/remove/' + ${p.policyId}}">Деактивировать</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Карточка для добавления новой политики -->
+            <div class="col-md-4 mb-4">
+                <div class="card add-policy-card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Создать новую политику</h5>
+                        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#addPolicyModal">
+                            <i class="fas fa-plus"></i> Выбрать условия
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для создания новой политики -->
+    <div class="modal fade" id="addPolicyModal" tabindex="-1" role="dialog" aria-labelledby="addPolicyModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addPolicyModalLabel">Add New Policy</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form th:action="@{'policies/policy/add'}" method="post">
+                        <div class="form-group">
+                            <label for="sourceId">SourceID</label>
+                            <select name="sourceId" id="sourceId" class="form-control" required
+                                    aria-label=".form-select-sm example">
+                                <option selected disabled value=" ">Choose</option>
+                                <option th:each="s : ${sources}"
+                                        th:value="${s}"
+                                        th:text="${s}"></option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="sourceType">Source Type</label>
+                            <select class="form-control" id="sourceType" name="sourceType" required>
+                                <option selected disabled value="0">Choose</option>
+                                <option value="1">HTML</option>
+                                <option value="2">TXT</option>
+                                <option value="3">PDF</option>
+                                <option value="4">XLSX</option>
+                                <option value="5">DOCX</option>
+                                <option value="6">ZIP</option>
+                                <option value="7">PNG</option>
+                                <option value="8">JPEG</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="allowedRole">Allowed Role</label>
+                            <select class="form-control" id="allowedRole" name="allowedRole" required>
+                                <option selected disabled value="0">Choose</option>
+                                <option value="2">Менеджер</option>
+                                <option value="3">Сотрудник</option>
+                                <option value="4">Гость</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="allowedDepartment">Allowed Department</label>
+                            <select class="form-control" id="allowedDepartment" name="allowedDepartment" required>
+                                <option selected disabled value="0">Choose</option>
+                                <option value="1">Информационные технологии</option>
+                                <option value="2">Отдел кадров</option>
+                                <option value="3">Финансы</option>
+                                <option value="4">Отдел продаж</option>
+                                <option value="5">Маркетинг</option>
+                                <option value="6">Операции</option>
+                                <option value="7">Служба поддержки</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Создать</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Подключение jQuery и Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <!-- Подключение FontAwesome для иконки -->
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+</div>
+</body>
+</html>
