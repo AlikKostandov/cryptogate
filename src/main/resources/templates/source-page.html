@@ -53,23 +53,23 @@
                     <select name="sourceType" id="department" class="form-control" required
                             aria-label=".form-select-sm example">
                         <option selected disabled value=" ">Choose</option>
-                        <option value="0">HTML</option>
-                        <option value="1">TXT</option>
-                        <option value="2">PDF</option>
-                        <option value="3">XLSX</option>
-                        <option value="4">DOCX</option>
-                        <option value="5">ZIP</option>
-                        <option value="6">PNG</option>
-                        <option value="7">JPEG</option>
+                        <option value="1">HTML</option>
+                        <option value="2">TXT</option>
+                        <option value="3">PDF</option>
+                        <option value="4">XLSX</option>
+                        <option value="5">DOCX</option>
+                        <option value="6">ZIP</option>
+                        <option value="7">PNG</option>
+                        <option value="8">JPEG</option>
                     </select>
                 </td>
                 <td>
                     <select name="secretLevel" id="secretLevel" required class="form-control" aria-label=".form-select-sm example">
                         <option selected disabled value=" ">Choose</option>
-                        <option value="0">PUBLIC</option>
-                        <option value="1">ARBITRARY</option>
-                        <option value="2">CONFIDENTIAL</option>
-                        <option value="3">PRIVATE</option>
+                        <option value="1">PUBLIC</option>
+                        <option value="2">ARBITRARY</option>
+                        <option value="3">CONFIDENTIAL</option>
+                        <option value="4">PRIVATE</option>
                     </select>
                     <div class="form-group">
                         <label for="allowedUser">Allowed Users:</label>
@@ -117,7 +117,7 @@
 
 <script>
     document.getElementById('secretLevel').addEventListener('change', function() {
-        if (this.value === '2') {
+        if (this.value === '3') {
             $('#userModal').modal('show');
         } else {
             $('#allowedUser').val('');

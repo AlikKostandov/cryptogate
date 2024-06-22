@@ -7,10 +7,10 @@ import java.util.Arrays;
 @Getter
 public enum SecretLevel {
 
-    PUBLIC(0L),
-    ARBITRARY(1L),
-    CONFIDENTIAL(2L),
-    PRIVATE(3L);
+    PUBLIC(1L),
+    ARBITRARY(2L),
+    CONFIDENTIAL(3L),
+    PRIVATE(4L);
 
     private final Long level;
 

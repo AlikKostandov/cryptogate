@@ -7,13 +7,13 @@ import java.util.Arrays;
 @Getter
 public enum Department {
 
-    IT(0L, "Информационные технологии"),
-    HR(1L, "Отдел кадров"),
-    FINANCE(2L, "Финансы"),
-    SALES(3L, "Отдел продаж"),
-    MARKETING(4L, "Маркетинг"),
-    OPERATIONS(5L, "Операции"),
-    CUSTOMER_SERVICE(6L, "Служба поддержки");
+    IT(1L, "Информационные технологии"),
+    HR(2L, "Отдел кадров"),
+    FINANCE(3L, "Финансы"),
+    SALES(4L, "Отдел продаж"),
+    MARKETING(5L, "Маркетинг"),
+    OPERATIONS(6L, "Операции"),
+    CUSTOMER_SERVICE(7L, "Служба поддержки");
 
     private final Long depId;
     private final String departmentName;

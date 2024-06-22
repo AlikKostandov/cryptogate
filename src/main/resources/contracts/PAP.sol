@@ -22,17 +22,17 @@ contract PAP {
 
     function createPolicy(
         string memory _policyId,
+        string memory _sourceId,
         uint _sourceType,
-        uint _secretLevel,
-        uint[] memory _allowedRoles,
-        uint[] memory _allowedDepartments
+        uint _allowedRole,
+        uint _allowedDepartment
     ) public onlyOwner {
         prp.storePolicy(
             _policyId,
+            _sourceId,
             _sourceType,
-            _secretLevel,
-            _allowedRoles,
-            _allowedDepartments);
+            _allowedRole,
+            _allowedDepartment);
         emit PolicyStored(_policyId, _sourceType, owner);
     }
 
