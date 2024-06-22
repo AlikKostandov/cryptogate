@@ -32,10 +32,13 @@ public class EthereumConfig {
     }
 
     @Bean
-    public PRP prp(Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
+    public PRP prp(Web3j web3j,
+                   TransactionManager transactionManager,
+                   ContractGasProvider contractGasProvider,
+                   @Value("${ethereum.contract-address.prp}") String prpAddress) {
         PRP prp;
         try {
-            prp = PRP.deploy(web3j, transactionManager, contractGasProvider).send();
+            prp = PRP.load(prpAddress, web3j, transactionManager, contractGasProvider);
         } catch (Exception e) {
             log.error("Error while deploying a contract", e);
             throw new RuntimeException(e);
@@ -45,11 +48,15 @@ public class EthereumConfig {
     }
 
     @Bean
-    public PAP pap(Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider, PRP prp) {
+    public PAP pap(Web3j web3j,
+                   TransactionManager transactionManager,
+                   ContractGasProvider contractGasProvider,
+                   @Value("${ethereum.contract-address.pap}") String papAddress,
+                   PRP prp) {
         PAP pap;
         try {
-            pap = PAP.deploy(web3j, transactionManager, contractGasProvider, prp.getContractAddress()).send();
-            prp.setPAPAddress(pap.getContractAddress());
+            pap = PAP.load(papAddress, web3j, transactionManager, contractGasProvider);
+            prp.setPAPAddress(papAddress);
         } catch (Exception e) {
             log.error("Error while deploying a contract", e);
             throw new RuntimeException(e);

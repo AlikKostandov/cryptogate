@@ -41,8 +41,8 @@ contract PIP {
         uint _role,
         uint _department
     ) public onlyOwner {
-        require(_role <= 3, "Invalid role");
-        require(_department <= 6, "Invalid department");
+        require(_role > 0 && _role <= 4, "Invalid role");
+        require(_department > 0 && _department <= 7, "Invalid department");
         require(users[_userAddress].userAddress == address(0), "User already exists");
 
         users[_userAddress] = BaseUser({
@@ -92,8 +92,8 @@ contract PIP {
         uint _secretLevel,
         address _allowedUser
     ) public onlyOwner {
-        require(_sourceType <= 7, "Invalid source type");
-        require(_secretLevel <= 3, "Invalid secret level");
+        require(_sourceType > 0 && _sourceType <= 8, "Invalid source type");
+        require(_secretLevel > 0 && _secretLevel <= 4, "Invalid secret level");
         require(users[_owner].userAddress != address(0), "Owner does not exist");
         require(bytes(sources[_sourceId].sourceId).length == 0, "Source already exists");
 

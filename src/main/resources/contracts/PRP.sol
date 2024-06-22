@@ -5,10 +5,10 @@ contract PRP {
 
     struct Policy {
         string policyId;
+        string sourceId;
         uint sourceType;
-        uint secretLevel;
-        uint[] allowedRoles;
-        uint[] allowedDepartments;
+        uint allowedRole;
+        uint allowedDepartment;
     }
 
     mapping(string => Policy) private policies;
@@ -36,20 +36,31 @@ contract PRP {
 
     function storePolicy(
         string memory _policyId,
+        string memory _sourceId,
         uint _sourceType,
-        uint _secretLevel,
-        uint[] memory _allowedRoles,
-        uint[] memory _allowedDepartments
+        uint _allowedRole,
+        uint _allowedDepartment
     ) public onlyPAP {
         require(bytes(_policyId).length != 0, "Policy ID cannot be empty");
-        require(policies[_policyId].sourceType == 0 && policies[_policyId].secretLevel == 0, "Policy ID already exists");
+        require(
+            bytes(_sourceId).length > 0 || _sourceType != 0,
+            "Either sourceId or resourceType must be set"
+        );
+        require(
+            bytes(_sourceId).length == 0 || _sourceType == 0,
+            "Either sourceId or resourceType must be set, but not both"
+        );
+        require(
+            _allowedRole != 0 || _allowedDepartment != 0,
+            "Either allowedRole or allowedDepartment must be set"
+        );
 
         policies[_policyId] = Policy({
             policyId: _policyId,
+            sourceId: _sourceId,
             sourceType: _sourceType,
-            secretLevel: _secretLevel,
-            allowedRoles: _allowedRoles,
-            allowedDepartments: _allowedDepartments
+            allowedRole: _allowedRole,
+            allowedDepartment: _allowedDepartment
         });
         policyIds.push(_policyId);
     }

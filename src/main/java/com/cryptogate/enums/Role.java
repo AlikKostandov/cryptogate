@@ -7,10 +7,10 @@ import java.util.Arrays;
 @Getter
 public enum Role {
 
-    ADMIN(0L, "Админ"),
-    MANAGER(1L, "Менеджер"),
-    EMPLOYEE(2L, "Сотрудник"),
-    GUEST(3L, "Гость");
+    ADMIN(1L, "Админ"),
+    MANAGER(2L, "Менеджер"),
+    EMPLOYEE(3L, "Сотрудник"),
+    GUEST(4L, "Гость");
 
     private final Long id;
 

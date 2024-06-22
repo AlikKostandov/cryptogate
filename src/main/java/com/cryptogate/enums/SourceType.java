@@ -7,14 +7,14 @@ import java.util.Arrays;
 @Getter
 public enum SourceType {
 
-    HTML(0L, ".html"),
-    TXT(1L, ".txt"),
-    PDF(2L, ".pdf"),
-    XLSX(3L, ".xlsx"),
-    DOCX(4L, ".docx"),
-    ZIP(5L, ".zip"),
-    PNG(6L, ".png"),
-    JPEG(7L, ".jpeg");
+    HTML(1L, ".html"),
+    TXT(2L, ".txt"),
+    PDF(3L, ".pdf"),
+    XLSX(4L, ".xlsx"),
+    DOCX(5L, ".docx"),
+    ZIP(6L, ".zip"),
+    PNG(7L, ".png"),
+    JPEG(8L, ".jpeg");
 
     private final Long id;
 
