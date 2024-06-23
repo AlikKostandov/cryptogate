@@ -1,6 +1,6 @@
 package com.cryptogate.controller;
 
-import com.cryptogate.service.PIPService;
+import com.cryptogate.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequiredArgsConstructor
 public class AdminController {
 
-    private final PIPService userService;
+    private final UserService userService;
 
     @GetMapping("/admin")
-    public String showLoginForm(Model model) {
+    public String showAdminPage(Model model) {
         model.addAttribute("users", userService.getAllUsers());
         return "admin-page";
     }
@@ -27,8 +27,8 @@ public class AdminController {
     public String addNewUser(@RequestParam String userAddress,
                              @RequestParam String username,
                              @RequestParam Long role,
-                             @RequestParam Long department) throws Exception {
-        userService.addUser(userAddress, username, role, department);
+                             @RequestParam Long department) {
+        userService.registerUser(userAddress, username, role, department);
         return "redirect:/admin";
     }
 
