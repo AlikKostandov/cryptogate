@@ -72,7 +72,7 @@
                         <option value="4">PRIVATE</option>
                     </select>
                     <div class="form-group">
-                        <label for="allowedUser">Allowed Users:</label>
+                        <label for="allowedUser">Разрешенные пользователи:</label>
                         <input type="text" id="allowedUser" name="allowedUser" class="form-control" readonly>
                     </div>
                 </td>
@@ -83,6 +83,17 @@
         </tr>
         </tbody>
     </table>
+    <h2>Протестировать доступы для пользователя:</h2>
+    <form th:action="@{'/user/sources'}" method="get">
+        <div class="form-group">
+            <label for="userAddress">Адрес пользователя:</label>
+            <select name="userAddress" id="userAddress" class="form-control" required>
+                <option selected disabled value="">Choose</option>
+                <option th:each="u : ${users}" th:value="${u}" th:text="${u}"></option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Протестировать</button>
+    </form>
 </div>
 <div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">

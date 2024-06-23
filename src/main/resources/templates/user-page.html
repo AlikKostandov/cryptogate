@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Cryptogate</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+<div class="container">
+    <h1>Ресурсы системы:</h1>
+    <br/>
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <td><b>Ресурс</b></td>
+            <td><b>Название</b></td>
+            <td><b>Тип ресурса</b></td>
+            <td><b>Доступ</b></td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="s : ${sources}">
+            <td th:text="${s.sourceId}"></td>
+            <td th:text="${s.title}"></td>
+            <td th:text="${s.sourceType.extension}"></td>
+            <td th:if="${accessGranted == null || s.sourceId != sourceId}">
+                <span></span>
+            </td>
+            <td th:if="${accessGranted != null && accessGranted && s.sourceId == sourceId}">
+                <span>Разрешен</span>
+            </td>
+            <td th:if="${accessGranted != null && !accessGranted && s.sourceId == sourceId}">
+                <span>Запрещен</span>
+            </td>
+            <td>
+                <form th:action="@{/user/requestAccess/{userAddress}/{sourceId}(userAddress=${userAddress}, sourceId=${s.sourceId})}"
+                      method="post">
+                    <input type="submit" class="btn btn-danger" value="Запросить доступ">
+                </form>
+            </td>
+        </tr>
+        </tbody>
+
+    </table>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    document.getElementById('secretLevel').addEventListener('change', function () {
+        if (this.value === '3') {
+            $('#userModal').modal('show');
+        } else {
+            $('#allowedUser').val('');
+            $('#userSelectionForm input:checked').prop('checked', false);
+        }
+    });
+
+    document.getElementById('saveUser').addEventListener('click', function () {
+        let allowedUser = $('#userSelectionForm input:checked').val();
+        $('#allowedUser').val(allowedUser);
+        $('#userModal').modal('hide');
+    });
+</script>
+</body>
+</html>
