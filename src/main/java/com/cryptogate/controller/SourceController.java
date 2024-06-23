@@ -1,7 +1,8 @@
 package com.cryptogate.controller;
 
 import com.cryptogate.dto.BaseUserEntity;
-import com.cryptogate.service.PIPService;
+import com.cryptogate.service.SourceService;
+import com.cryptogate.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -18,12 +19,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SourceController {
 
-    private final PIPService pipService;
+    private final UserService userService;
+
+    private final SourceService sourceService;
 
     @GetMapping("/sources")
-    public String showSourcePage(Model model) {
-        model.addAttribute("sources", pipService.getAllSources());
-        model.addAttribute("users", pipService.getAllUsers().stream()
+    public String showSourcePage(Model model) throws Exception {
+        model.addAttribute("sources", sourceService.getAllSources());
+        model.addAttribute("users",
+                userService.getAllUsers().stream()
                 .map(BaseUserEntity::getUserAddress)
                 .collect(Collectors.toList()));
         return "source-page";
@@ -35,13 +39,13 @@ public class SourceController {
                                @RequestParam Long sourceType,
                                @RequestParam Long secretLevel,
                                @RequestParam String allowedUser) throws Exception {
-        pipService.addSource(owner, title, sourceType, secretLevel, allowedUser);
+        sourceService.addSource(owner, title, sourceType, secretLevel, allowedUser);
         return "redirect:/sources";
     }
 
     @GetMapping("/sources/remove/{sourceId}")
-    public String removeSource(@PathVariable String sourceId) {
-        pipService.removeSource(sourceId);
+    public String removeSource(@PathVariable String sourceId) throws Exception {
+        sourceService.removeSource(sourceId);
         return "redirect:/sources";
     }
 

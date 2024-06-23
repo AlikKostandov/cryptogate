@@ -1,4 +1,4 @@
-package com.cryptogate.service;
+package com.cryptogate.contract.service;
 
 import com.cryptogate.contract.PDP;
 import com.cryptogate.contract.PEP;
@@ -23,14 +23,9 @@ public class PEPService {
     @Value("${ethereum.contract-address.pep}")
     private String pepAddress;
 
-    public boolean checkAccess(String userAddress, String sourceId) {
-        try {
-            PEP pep = loadPepContract(userAddress);
-            return pep.requestAccess(sourceId).send();
-        } catch (Exception e) {
-            log.info("Exception reason: " + e.getMessage());
-        }
-        return false;
+    public boolean checkAccess(String userAddress, String sourceId) throws Exception {
+        PEP pep = loadPepContract(userAddress);
+        return pep.requestAccess(sourceId).send();
     }
 
     private PEP loadPepContract(String userAddress) {

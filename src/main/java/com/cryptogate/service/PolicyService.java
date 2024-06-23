@@ -1,7 +1,7 @@
 package com.cryptogate.service;
 
 import com.cryptogate.contract.PAP;
-import com.cryptogate.contract.PRP;
+import com.cryptogate.contract.service.PAPService;
 import com.cryptogate.converters.PolicyConverter;
 import com.cryptogate.dto.Policy;
 import lombok.RequiredArgsConstructor;
@@ -20,47 +20,48 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PAPService {
+public class PolicyService {
 
-    private final PAP pap;
-
-    private final PRP prp;
+    private final PAPService papService;
 
     private final PolicyConverter policyConverter;
 
     public void addPolicy(String sourceId, Long sourceType,
-                          Long allowedRole, Long allowedDepartment) throws Exception {
+                          Long allowedRole, Long allowedDepartment) {
         try {
             String policyId = UUID.randomUUID().toString();
-            prp.storePolicy(policyId,
+            papService.addPolicy(policyId,
                     StringUtils.isEmpty(sourceId) ? "" : sourceId,
                     sourceType != null ? BigInteger.valueOf(sourceType) : BigInteger.valueOf(0L),
                     allowedRole != null ? BigInteger.valueOf(allowedRole) : BigInteger.valueOf(0L),
-                    allowedDepartment != null ? BigInteger.valueOf(allowedDepartment) : BigInteger.valueOf(0L)).send();
+                    allowedDepartment != null ? BigInteger.valueOf(allowedDepartment) : BigInteger.valueOf(0L));
         } catch (TransactionException e) {
-            log.info("Exception reason: " + e.getMessage());
+            log.info("Exception reason: {}", e.getMessage());
+        } catch (Exception e) {
+            log.info("Техническая ошибка");
         }
     }
 
     public void removePolicy(String policyId) {
         try {
-            prp.removePolicy(policyId).send();
+            papService.removePolicy(policyId);
+        } catch (TransactionException e) {
+            log.info("Exception reason: {}", e.getMessage());
         } catch (Exception e) {
-            log.info("Exception reason: " + e.getMessage());
+            log.info("Техническая ошибка");
         }
     }
 
     public List<Policy> getAllPolicy() {
         List<PAP.Policy> policiesFromBC = null;
         try {
-            policiesFromBC = pap.getAllPolicies().send();
+            policiesFromBC = papService.getAllPolicy();
             if (Boolean.FALSE.equals(CollectionUtils.isEmpty(policiesFromBC))) {
                 return policiesFromBC.stream()
                         .map(policyConverter::convert).collect(Collectors.toList());
             }
         } catch (Exception e) {
             log.info("Exception reason: " + e.getMessage());
-            return new ArrayList<>();
         }
         return new ArrayList<>();
     }
