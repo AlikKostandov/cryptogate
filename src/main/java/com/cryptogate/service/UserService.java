@@ -3,7 +3,12 @@ package com.cryptogate.service;
 import com.cryptogate.contract.PIP;
 import com.cryptogate.contract.service.PIPService;
 import com.cryptogate.converters.BaseUserConverter;
-import com.cryptogate.dto.BaseUserEntity;
+import com.cryptogate.dto.BaseUserDto;
+import com.cryptogate.entity.UserServiceAuditEntity;
+import com.cryptogate.enums.OperationType;
+import com.cryptogate.enums.TransactionStatus;
+import com.cryptogate.repository.UserServiceAuditRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,31 +30,56 @@ public class UserService {
 
     private final BaseUserConverter baseUserConverter;
 
+    private final UserServiceAuditRepository auditRepository;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
+
     public void registerUser(String userAddress, String username,
                              Long role, Long department) {
+        TransactionReceipt transaction;
+        UserServiceAuditEntity entity = new UserServiceAuditEntity();
+        entity.setUserAddress(userAddress);
+        entity.setOperationType(OperationType.CREATE);
         try {
-            TransactionReceipt transaction = pipService.addUser(
+            transaction = pipService.addUser(
                     userAddress, username,
                     BigInteger.valueOf(role),
                     BigInteger.valueOf(department));
+            entity.setTransaction(objectMapper.writeValueAsString(transaction));
+            entity.setStatus(TransactionStatus.SUCCESS);
         } catch (TransactionException e) {
             log.info("Exception reason: {}", e.getMessage());
+            entity.setErrorDesc(e.getMessage());
+            entity.setStatus(TransactionStatus.FAILED);
         } catch (Exception e) {
             log.info("Техническая ошибка");
+            entity.setErrorDesc("Техническая ошибка");
+            entity.setStatus(TransactionStatus.FAILED);
         }
+        auditRepository.save(entity);
     }
 
     public void removeUser(String userAddress) {
+        UserServiceAuditEntity entity = new UserServiceAuditEntity();
+        entity.setUserAddress(userAddress);
+        entity.setOperationType(OperationType.DELETE);
         try {
-            pipService.removeUser(userAddress);
+            TransactionReceipt transaction = pipService.removeUser(userAddress);
+            entity.setTransaction(objectMapper.writeValueAsString(transaction));
+            entity.setStatus(TransactionStatus.SUCCESS);
         } catch (TransactionException e) {
             log.info("Exception reason: {}", e.getMessage());
+            entity.setErrorDesc(e.getMessage());
+            entity.setStatus(TransactionStatus.FAILED);
         } catch (Exception e) {
             log.info("Техническая ошибка");
+            entity.setErrorDesc("Техническая ошибка");
+            entity.setStatus(TransactionStatus.FAILED);
         }
+        auditRepository.save(entity);
     }
 
-    public List<BaseUserEntity> getAllUsers() {
+    public List<BaseUserDto> getAllUsers() {
         List<PIP.BaseUser> usersFromBC = null;
         try {
             usersFromBC = pipService.getAllUsers();

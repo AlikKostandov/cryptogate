@@ -1,6 +1,6 @@
 package com.cryptogate.controller;
 
-import com.cryptogate.dto.BaseUserEntity;
+import com.cryptogate.dto.BaseUserDto;
 import com.cryptogate.service.SourceService;
 import com.cryptogate.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class SourceController {
         model.addAttribute("sources", sourceService.getAllSources());
         model.addAttribute("users",
                 userService.getAllUsers().stream()
-                .map(BaseUserEntity::getUserAddress)
+                .map(BaseUserDto::getUserAddress)
                 .collect(Collectors.toList()));
         return "source-page";
     }

@@ -8,7 +8,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class BaseUserEntity {
+public class BaseUserDto {
 
     private String userAddress;
 

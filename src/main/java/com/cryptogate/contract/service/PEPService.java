@@ -23,7 +23,7 @@ public class PEPService {
     @Value("${ethereum.contract-address.pep}")
     private String pepAddress;
 
-    public boolean checkAccess(String userAddress, String sourceId) throws Exception {
+    public Boolean checkAccess(String userAddress, String sourceId) throws Exception {
         PEP pep = loadPepContract(userAddress);
         return pep.requestAccess(sourceId).send();
     }
