@@ -1,10 +1,13 @@
 package com.cryptogate.service;
 
 import com.cryptogate.contract.service.PEPService;
+import com.cryptogate.entity.AccessRequestAuditEntity;
+import com.cryptogate.repository.AccessRequestAuditRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.web3j.protocol.exceptions.TransactionException;
+
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -13,14 +16,21 @@ public class AccessControlService {
 
     private final PEPService pepService;
 
+    private final AccessRequestAuditRepository auditRepository;
+
     public boolean checkAccess(String userAddress, String sourceId) {
+        boolean isAccsessGranted = false;
+        AccessRequestAuditEntity accessRequest = new AccessRequestAuditEntity();
+        accessRequest.setInitiatorAddress(userAddress);
+        accessRequest.setSourceUuid(UUID.fromString(sourceId));
         try {
-            return pepService.checkAccess(userAddress, sourceId);
-        } catch (TransactionException e) {
-            log.info("Exception reason: {}", e.getMessage());
+            isAccsessGranted = pepService.checkAccess(userAddress, sourceId);
         } catch (Exception e) {
-            log.info("Техническая ошибка");
+            log.info("Exception reason: {}", e.getMessage());
+            accessRequest.setErrorDesc(e.getMessage());
         }
-        return false;
+        accessRequest.setAccessGranted(isAccsessGranted);
+        auditRepository.save(accessRequest);
+        return isAccsessGranted;
     }
 }

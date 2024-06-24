@@ -4,11 +4,20 @@ import com.cryptogate.contract.PAP;
 import com.cryptogate.contract.service.PAPService;
 import com.cryptogate.converters.PolicyConverter;
 import com.cryptogate.dto.Policy;
+import com.cryptogate.entity.PolicyServiceAuditEntity;
+import com.cryptogate.enums.OperationType;
+import com.cryptogate.enums.PolicyCategory;
+import com.cryptogate.enums.SourceType;
+import com.cryptogate.enums.TransactionStatus;
+import com.cryptogate.repository.PolicyServiceAuditRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.thymeleaf.util.StringUtils;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 
 import java.math.BigInteger;
@@ -26,30 +35,63 @@ public class PolicyService {
 
     private final PolicyConverter policyConverter;
 
+    private final PolicyServiceAuditRepository auditRepository;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
+
     public void addPolicy(String sourceId, Long sourceType,
                           Long allowedRole, Long allowedDepartment) {
+        TransactionReceipt transaction;
+        UUID policyId = UUID.randomUUID();
+        BigInteger sType = define(sourceType);
+        PolicyServiceAuditEntity auditEntity = new PolicyServiceAuditEntity();
+        auditEntity.setOperationType(OperationType.CREATE);
+        auditEntity.setPolicyUuid(policyId);
+        if (sType.longValue() == 0L) {
+            auditEntity.setPolicyCategory(PolicyCategory.SOURCE_ID);
+            auditEntity.setSourceUuid(UUID.fromString(sourceId));
+        } else {
+            auditEntity.setPolicyCategory(PolicyCategory.SOURCE_TYPE);
+            auditEntity.setSourceType(SourceType.getById(sourceType));
+        }
         try {
-            String policyId = UUID.randomUUID().toString();
-            papService.addPolicy(policyId,
-                    StringUtils.isEmpty(sourceId) ? "" : sourceId,
-                    sourceType != null ? BigInteger.valueOf(sourceType) : BigInteger.valueOf(0L),
-                    allowedRole != null ? BigInteger.valueOf(allowedRole) : BigInteger.valueOf(0L),
-                    allowedDepartment != null ? BigInteger.valueOf(allowedDepartment) : BigInteger.valueOf(0L));
+            transaction = papService.addPolicy(policyId.toString(),
+                    defineSourceId(sourceId), sType,
+                    define(allowedRole),
+                    define(allowedDepartment));
+            auditEntity.setTransaction(objectMapper.writeValueAsString(transaction));
+            auditEntity.setStatus(TransactionStatus.SUCCESS);
         } catch (TransactionException e) {
             log.info("Exception reason: {}", e.getMessage());
+            auditEntity.setStatus(TransactionStatus.FAILED);
+            auditEntity.setErrorDesc(e.getMessage());
         } catch (Exception e) {
             log.info("Техническая ошибка");
+            auditEntity.setErrorDesc("Техническая ошибка");
+            auditEntity.setStatus(TransactionStatus.FAILED);
         }
+        auditRepository.save(auditEntity);
     }
 
     public void removePolicy(String policyId) {
+        TransactionReceipt transaction;
+        PolicyServiceAuditEntity auditEntity = new PolicyServiceAuditEntity();
+        auditEntity.setOperationType(OperationType.DELETE);
+        auditEntity.setPolicyUuid(UUID.fromString(policyId));
         try {
-            papService.removePolicy(policyId);
+            transaction = papService.removePolicy(policyId);
+            auditEntity.setTransaction(objectMapper.writeValueAsString(transaction));
+            auditEntity.setStatus(TransactionStatus.SUCCESS);
         } catch (TransactionException e) {
             log.info("Exception reason: {}", e.getMessage());
+            auditEntity.setStatus(TransactionStatus.FAILED);
+            auditEntity.setErrorDesc(e.getMessage());
         } catch (Exception e) {
             log.info("Техническая ошибка");
+            auditEntity.setErrorDesc("Техническая ошибка");
+            auditEntity.setStatus(TransactionStatus.FAILED);
         }
+        auditRepository.save(auditEntity);
     }
 
     public List<Policy> getAllPolicy() {
@@ -64,6 +106,14 @@ public class PolicyService {
             log.info("Exception reason: " + e.getMessage());
         }
         return new ArrayList<>();
+    }
+
+    private static @NotNull BigInteger define(Long allowedRole) {
+        return allowedRole != null ? BigInteger.valueOf(allowedRole) : BigInteger.valueOf(0L);
+    }
+
+    private static @NotNull String defineSourceId(String sourceId) {
+        return StringUtils.isEmpty(sourceId) ? "" : sourceId;
     }
 
 }
