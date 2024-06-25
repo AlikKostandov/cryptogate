@@ -23,6 +23,9 @@
                 <li class="nav-item" th:classappend="${activeTab == 'Admin' ? 'active' : ''}">
                     <a class="nav-link" th:href="@{'/admin'}">Админ</a>
                 </li>
+                <li class="nav-item" th:classappend="${activeTab == 'Audit' ? 'active' : ''}">
+                    <a class="nav-link" th:href="@{'/audit'}">Аудит</a>
+                </li>
             </ul>
         </div>
     </nav>

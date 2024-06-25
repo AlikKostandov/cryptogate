@@ -11,6 +11,7 @@ import com.cryptogate.enums.SourceType;
 import com.cryptogate.enums.TransactionStatus;
 import com.cryptogate.repository.PolicyServiceAuditRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +38,7 @@ public class PolicyService {
 
     private final PolicyServiceAuditRepository auditRepository;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectWriter writer = (new ObjectMapper()).writerWithDefaultPrettyPrinter();
 
     public void addPolicy(String sourceId, Long sourceType,
                           Long allowedRole, Long allowedDepartment) {
@@ -59,7 +60,7 @@ public class PolicyService {
                     defineSourceId(sourceId), sType,
                     define(allowedRole),
                     define(allowedDepartment));
-            auditEntity.setTransaction(objectMapper.writeValueAsString(transaction));
+            auditEntity.setTransaction(writer.writeValueAsString(transaction));
             auditEntity.setStatus(TransactionStatus.SUCCESS);
         } catch (TransactionException e) {
             log.info("Exception reason: {}", e.getMessage());
@@ -80,7 +81,7 @@ public class PolicyService {
         auditEntity.setPolicyUuid(UUID.fromString(policyId));
         try {
             transaction = papService.removePolicy(policyId);
-            auditEntity.setTransaction(objectMapper.writeValueAsString(transaction));
+            auditEntity.setTransaction(writer.writeValueAsString(transaction));
             auditEntity.setStatus(TransactionStatus.SUCCESS);
         } catch (TransactionException e) {
             log.info("Exception reason: {}", e.getMessage());
