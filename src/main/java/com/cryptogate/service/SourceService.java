@@ -10,6 +10,7 @@ import com.cryptogate.enums.TransactionStatus;
 import com.cryptogate.repository.SourceServiceAuditRepository;
 import com.cryptogate.util.CommonConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,7 +36,7 @@ public class SourceService {
 
     private final SourceServiceAuditRepository auditRepository;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectWriter writer = (new ObjectMapper()).writerWithDefaultPrettyPrinter();
 
     public void addSource(String owner, String title,
                           Long sourceType, Long secretLevel,
@@ -50,7 +51,7 @@ public class SourceService {
                     BigInteger.valueOf(sourceType),
                     BigInteger.valueOf(secretLevel),
                     StringUtils.isEmpty(allowedUsers) ? CommonConstants.NULL_USER : allowedUsers);
-            sourceServiceAuditEntity.setTransaction(objectMapper.writeValueAsString(transaction));
+            sourceServiceAuditEntity.setTransaction(writer.writeValueAsString(transaction));
             sourceServiceAuditEntity.setStatus(TransactionStatus.SUCCESS);
         } catch (TransactionException e) {
             log.info("Exception reason: {}", e.getMessage());
@@ -71,7 +72,7 @@ public class SourceService {
         sourceServiceAuditEntity.setOperationType(OperationType.DELETE);
         try {
             TransactionReceipt transaction = pipService.removeSource(sourceId);
-            sourceServiceAuditEntity.setTransaction(objectMapper.writeValueAsString(transaction));
+            sourceServiceAuditEntity.setTransaction(writer.writeValueAsString(transaction));
             sourceServiceAuditEntity.setStatus(TransactionStatus.SUCCESS);
         } catch (TransactionException e) {
             log.info("Exception reason: {}", e.getMessage());

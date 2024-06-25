@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cryptogate</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/highlight.min.js"></script>
+    <style>
+        .audit-table {
+            display: none;
+        }
+        .modal-body pre {
+            white-space: pre-wrap;       /* CSS3 */
+            white-space: -moz-pre-wrap;  /* Firefox */
+            white-space: -o-pre-wrap;    /* Opera 7 */
+            word-wrap: break-word;       /* IE */
+        }
+        .modal-wide .modal-dialog {
+            max-width: 80%; /* Измените процент по вашему усмотрению */
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{navigation :: navigation(Audit)}"/>
+<div class="container">
+    <h1>Аудит системы</h1>
+    <br/>
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-primary" onclick="loadAuditTable('access')">Аудит запросов</button>
+        <button type="button" class="btn btn-primary" onclick="loadAuditTable('user')">Аудит пользователей</button>
+        <button type="button" class="btn btn-primary" onclick="loadAuditTable('source')">Аудит по ресурсам</button>
+        <button type="button" class="btn btn-primary" onclick="loadAuditTable('policy')">Аудит по политикам</button>
+    </div>
+    <div id="audit-table-container">
+        <table id="access-table" class="table audit-table">
+            <thead>
+            <tr>
+                <th>Кто запросил</th>
+                <th>Что</th>
+                <th>Когда</th>
+                <th>Доступ</th>
+                <th>Ошибка</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <table id="user-table" class="table audit-table">
+            <thead>
+            <tr>
+                <th>Операция</th>
+                <th>Время</th>
+                <th>Пользователь</th>
+                <th>Статус</th>
+                <th>Ошибка</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <table id="source-table" class="table audit-table">
+            <thead>
+            <tr>
+                <th>Операция</th>
+                <th>Время</th>
+                <th>Ресурс</th>
+                <th>Статус</th>
+                <th>Ошибка</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <table id="policy-table" class="table audit-table">
+            <thead>
+            <tr>
+                <th>Операция</th>
+                <th>Время</th>
+                <th>Политика</th>
+                <th>Ресурс</th>
+                <th>Вид ресурса</th>
+                <th>Статус</th>
+                <th>Ошибка</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade modal-wide" id="transactionModal" tabindex="-1" role="dialog" aria-labelledby="transactionModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="transactionModalLabel">Transaction Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <pre id="transactionDetails"></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/highlight.min.js"></script>
+<script>
+    function loadAuditTable(type) {
+        $(".audit-table").hide();
+        $("#" + type + "-table").show();
+        $.get("/cryptogate/audit/" + type, function (data) {
+            let tableBody = $("#" + type + "-table tbody");
+            tableBody.empty();
+            data.forEach(function (item) {
+                let row;
+                if (type === 'access') {
+                    row = `<tr>
+                        <td>${item.initiatorAddress}</td>
+                        <td>${item.sourceUuid}</td>
+                        <td>${formatDate(item.requestDttm)}</td>
+                        <td>${formatAccess(item.accessGranted)}</td>
+                        <td>${item.errorDesc || ''}</td>
+                    </tr>`;
+                } else if (type === 'user') {
+                    row = `<tr ondblclick="showTransaction('user', ${item.id})">
+                        <td>${item.operationType}</td>
+                        <td>${formatDate(item.requestDttm)}</td>
+                        <td>${item.userAddress}</td>
+                        <td>${item.status}</td>
+                        <td>${item.errorDesc || ''}</td>
+                    </tr>`;
+                } else if (type === 'source') {
+                    row = `<tr ondblclick="showTransaction('source', ${item.id})">
+                        <td>${item.operationType}</td>
+                        <td>${formatDate(item.requestDttm)}</td>
+                        <td>${item.sourceUuid}</td>
+                        <td>${item.status}</td>
+                        <td>${item.errorDesc || ''}</td>
+                    </tr>`;
+                } else if (type === 'policy') {
+                    row = `<tr ondblclick="showTransaction('policy', ${item.id})">
+                        <td>${item.operationType}</td>
+                        <td>${formatDate(item.requestDttm)}</td>
+                        <td>${item.policyUuid}</td>
+                        <td>${item.sourceUuid || ''}</td>
+                        <td>${item.sourceType || ''}</td>
+                        <td>${item.status}</td>
+                        <td>${item.errorDesc || ''}</td>
+                    </tr>`;
+                }
+                tableBody.append(row);
+            });
+        });
+    }
+
+    function formatDate(dateString) {
+        let date = new Date(dateString);
+        let day = ("0" + date.getDate()).slice(-2);
+        let month = ("0" + (date.getMonth() + 1)).slice(-2);
+        let year = date.getFullYear();
+        let hours = ("0" + date.getHours()).slice(-2);
+        let minutes = ("0" + date.getMinutes()).slice(-2);
+        let seconds = ("0" + date.getSeconds()).slice(-2);
+        return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+    }
+
+    function formatAccess(accessGranted) {
+        return accessGranted ? "Разрешен" : "Запрещен";
+    }
+
+    function showTransaction(type, id) {
+        $.get(`/cryptogate/audit/${type}/transaction/${id}`, function(data) {
+            let formattedJson = data.replace(/\\r\\n/g, '\r\n');
+            $("#transactionDetails").html(`<pre><code class="json">${formattedJson}</code></pre>`);
+            hljs.highlightBlock(document.getElementById('transactionDetails').querySelector('code'));
+            $("#transactionModal").modal('show');
+        });
+    }
+    hljs.initHighlightingOnLoad();
+</script>
+</body>
+</html>

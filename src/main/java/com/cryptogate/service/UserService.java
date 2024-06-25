@@ -9,6 +9,7 @@ import com.cryptogate.enums.OperationType;
 import com.cryptogate.enums.TransactionStatus;
 import com.cryptogate.repository.UserServiceAuditRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,7 @@ public class UserService {
 
     private final UserServiceAuditRepository auditRepository;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectWriter writer = (new ObjectMapper()).writerWithDefaultPrettyPrinter();
 
     public void registerUser(String userAddress, String username,
                              Long role, Long department) {
@@ -45,7 +46,7 @@ public class UserService {
                     userAddress, username,
                     BigInteger.valueOf(role),
                     BigInteger.valueOf(department));
-            entity.setTransaction(objectMapper.writeValueAsString(transaction));
+            entity.setTransaction(writer.writeValueAsString(transaction));
             entity.setStatus(TransactionStatus.SUCCESS);
         } catch (TransactionException e) {
             log.info("Exception reason: {}", e.getMessage());
@@ -65,7 +66,7 @@ public class UserService {
         entity.setOperationType(OperationType.DELETE);
         try {
             TransactionReceipt transaction = pipService.removeUser(userAddress);
-            entity.setTransaction(objectMapper.writeValueAsString(transaction));
+            entity.setTransaction(writer.writeValueAsString(transaction));
             entity.setStatus(TransactionStatus.SUCCESS);
         } catch (TransactionException e) {
             log.info("Exception reason: {}", e.getMessage());
